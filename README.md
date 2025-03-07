@@ -2,6 +2,14 @@
 
 This repository provides a **simple, web-based interface** for using **OpenAI Whisper**, enabling users to effortlessly transcribe audio through a graphical interface. It is designed to be lightweight, easy to set up, and user-friendly.
 
+## Requirements
+
+Before you start, ensure you have the following installed on your machine:
+
+1. **Python** - A programming language required to run the application. You can download it from the official website here: [Python Official Website](https://www.python.org/downloads/).
+2. **Git** - A version control system to clone the repository. You can download it from the official website here: [Git Official Website](https://git-scm.com/downloads).
+3. **FFmpeg** - A multimedia framework for handling audio and video files. You can download it from the official website here: [FFmpeg Official Website](https://ffmpeg.org/download.html).
+
 ## Features
 
 - **User-friendly web UI** for seamless interaction with OpenAI Whisper.
