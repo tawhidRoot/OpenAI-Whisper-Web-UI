@@ -101,14 +101,3 @@ Contributions are welcome! Feel free to submit pull requests or report issues.
 ## Disclaimer
 
 This project is independent and not affiliated with OpenAI. Use at your own discretion.
-
-```
-
-### Key Improvements:
-- Enhanced structure and clearer instructions.
-- Corrected typos and formatting issues.
-- Added explanations for Linux/macOS users in a more straightforward manner.
-- Provided a section for troubleshooting and installing Python.
-
-This version should make it easier for users to follow along!
-```
