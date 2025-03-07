@@ -24,26 +24,11 @@ cd your-repository
 
 ### 3. **Install Required Dependencies**
 
-Ensure you have Python installed. Then, install the required Python packages:
+Run the following command to install all necessary Python packages:
 
 ```sh
-pip install openai-whisper pydub ffmpeg
+pip install -r requirements.txt
 ```
-
-Additionally, you may need to install FFmpeg separately if it’s not already installed. You can install it using:
-
-- **Windows (Chocolatey)**:
-  ```sh
-  choco install ffmpeg
-  ```
-- **Mac (Homebrew)**:
-  ```sh
-  brew install ffmpeg
-  ```
-- **Linux (Debian/Ubuntu)**:
-  ```sh
-  sudo apt install ffmpeg
-  ```
 
 ### 4. **Start the Application**
 
