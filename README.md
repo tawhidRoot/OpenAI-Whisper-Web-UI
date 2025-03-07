@@ -26,22 +26,34 @@ Change into the project folder:
 cd OpenAI-Whisper-Web-UI
 ```
 
-### 3. **Install Dependencies**
+### 3. **Run the Setup**
 
-Install all required Python packages:
+Run the appropriate setup file for your operating system:
 
-```bash
-pip install -r requirements.txt
-```
+- **Windows**: Double-click `setup.bat` to automatically set up the environment, install dependencies, and update Python if necessary.
+- **Linux/macOS**: Run `setup.sh` by executing the following command in your terminal:
+
+  ```bash
+  bash setup.sh
+  ```
+
+This will create a virtual environment, install required dependencies, and update Python if needed.
 
 ### 4. **Start the Application**
 
+Once the setup is complete:
+
 - **Windows**: Simply **double-click** `start_app.bat` to run the application.
-- **Linux/macOS**: Double-click `start_app.sh` to start the app.
+- **Linux/macOS**: Double-click `start_app.sh` to start the app, or run it in the terminal:
+
+  ```bash
+  ./start_app.sh
+  ```
 
 ### 5. **Additional Tips**
 
 - If you encounter an error related to Python, ensure Python is installed on your system.
+- You can update Python manually if needed using the provided installation instructions below.
 
 ---
 
@@ -67,24 +79,6 @@ If Python is not installed, follow these steps to install it:
   ```bash
   brew install python
   ```
-
----
-
-## For Linux/macOS Users
-
-To start the application on Linux or macOS, follow these steps:
-
-1. Make sure the script is executable:
-
-   ```bash
-   chmod +x start_app.sh
-   ```
-
-2. Run the application:
-
-   ```bash
-   ./start_app.sh
-   ```
 
 ---
 
