@@ -1,4 +1,3 @@
-````markdown
 # OpenAI Whisper Web UI
 
 This repository provides a simple, web-based interface for using OpenAI Whisper, enabling users to transcribe audio effortlessly through a graphical interface.
@@ -18,6 +17,7 @@ Start by cloning the repository:
 ```bash
 git clone https://github.com/tawhidRoot/OpenAI-Whisper-Web-UI.git
 ```
+
 ````
 
 ### 2. **Navigate to the Project Directory**
@@ -101,3 +101,4 @@ Contributions are welcome! Feel free to submit pull requests or report issues.
 ## Disclaimer
 
 This project is independent and not affiliated with OpenAI. Use at your own discretion.
+````
