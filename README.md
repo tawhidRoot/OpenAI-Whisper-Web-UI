@@ -41,11 +41,17 @@ For **Windows users**:
 
 For **Linux/macOS users**:
 
-- Open a terminal and run the following command to complete the setup:
+1. Before running the setup script, you may need to **make the script executable** by running:
 
-  ```bash
-  bash setup.sh
-  ```
+   ```bash
+   chmod +x setup.sh
+   ```
+
+2. Then, run the setup script with the following command:
+
+   ```bash
+   bash setup.sh
+   ```
 
 ### 4. Launch the Application
 
