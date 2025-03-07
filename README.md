@@ -10,16 +10,44 @@ This is a simple web-based interface for using OpenAI Whisper, allowing users to
 
 ## Installation & Usage
 
-1. **Clone the Repository**
-   ```sh
-   git clone https://github.com/your-username/your-repository.git
-   ```
-2. **Navigate to the Project Folder**
-   ```sh
-   cd your-repository
-   ```
-3. **Start the Application**
-   - On Windows, simply **double-click** `start_app.bat`.
+### 1. **Clone the Repository**
+
+```sh
+git clone https://github.com/tawhidRoot/OpenAI-Whisper-Web-UI.git
+```
+
+### 2. **Navigate to the Project Folder**
+
+```sh
+cd your-repository
+```
+
+### 3. **Install Required Dependencies**
+
+Ensure you have Python installed. Then, install the required Python packages:
+
+```sh
+pip install openai-whisper pydub ffmpeg
+```
+
+Additionally, you may need to install FFmpeg separately if it’s not already installed. You can install it using:
+
+- **Windows (Chocolatey)**:
+  ```sh
+  choco install ffmpeg
+  ```
+- **Mac (Homebrew)**:
+  ```sh
+  brew install ffmpeg
+  ```
+- **Linux (Debian/Ubuntu)**:
+  ```sh
+  sudo apt install ffmpeg
+  ```
+
+### 4. **Start the Application**
+
+- On Windows, simply **double-click** `start_app.bat`.
 
 That's it! The web application will launch, and you can start using OpenAI Whisper through the web UI.
 
