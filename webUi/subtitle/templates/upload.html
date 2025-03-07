@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Audio Transcription</title>
+
+    <!-- Bootstrap CSS (Local) -->
+    <link
+      rel="stylesheet"
+      href="{% static 'bootstrap-5.3.3-dist/css/bootstrap.min.css' %}"
+    />
+
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .container {
+        max-width: 600px;
+        margin-top: 50px;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .form-label {
+        font-weight: bold;
+      }
+      .btn-custom {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="text-center mb-4">AI Audio Transcription</h2>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label">Upload Audio File:</label>
+          {{ form.audio_file }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Whisper Model:</label>
+          {{ form.model_choice }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Language (Optional):</label>
+          {{ form.language }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Temperature:</label>
+          {{ form.temperature }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Best Of (Beam Size):</label>
+          {{ form.best_of }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Condition on Previous Text:</label>
+          {{ form.condition_on_previous_text }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Choose Output Format:</label>
+          {{ form.output_format }}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-custom">
+          Transcribe
+        </button>
+      </form>
+    </div>
+
+    <!-- Bootstrap JS (Local) -->
+    <script src="{% static 'bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js' %}"></script>
+  </body>
+</html>
