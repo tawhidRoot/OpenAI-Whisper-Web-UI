@@ -19,7 +19,7 @@ git clone https://github.com/tawhidRoot/OpenAI-Whisper-Web-UI.git
 ### 2. **Navigate to the Project Folder**
 
 ```sh
-cd your-repository
+cd OpenAI-Whisper-Web-UI
 ```
 
 ### 3. **Install Required Dependencies**
