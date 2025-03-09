@@ -9,6 +9,7 @@ Before you start, ensure you have the following installed on your machine:
 1. **Python** - A programming language required to run the application. You can download it from the official website here: [Python Official Website](https://www.python.org/downloads/).
 2. **Git** - A version control system to clone the repository. You can download it from the official website here: [Git Official Website](https://git-scm.com/downloads).
 3. **FFmpeg** - A multimedia framework for handling audio and video files. You can download it from the official website here: [FFmpeg Official Website](https://ffmpeg.org/download.html).
+4. **CUDA Toolkit (Optional)** - If you plan to use a GPU for faster processing, ensure that the [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) is installed along with the appropriate drivers for your GPU.
 
 ## Features
 
@@ -61,6 +62,12 @@ For **Linux/macOS users**:
    bash setup.sh
    ```
 
+The setup scripts will:
+
+- Create a virtual environment (`venv`) if it doesn't exist.
+- Install the required Python dependencies such as **Django** and **OpenAI Whisper**.
+- Check if CUDA is available and install **PyTorch** with GPU support if CUDA is present. Otherwise, it will install PyTorch with CPU support.
+
 ### 4. Launch the Application
 
 Once the setup is complete:
@@ -75,6 +82,71 @@ Once the setup is complete:
 ### 5. Additional Tips
 
 - If you encounter any errors during setup, rerun the setup script to ensure all dependencies are installed properly.
+- For GPU support, make sure you have the **CUDA Toolkit** and **drivers** installed. If you don't have a GPU, the application will still work using CPU support.
+
+---
+
+## Troubleshooting
+
+### **GPU Not Detected Issue**
+
+If Whisper is not using your GPU, follow these steps:
+
+#### **1. Check if CUDA is Installed**
+
+Run the following command in PowerShell or Command Prompt:
+
+```powershell
+where nvcc
+```
+
+If no path is returned, CUDA is not installed correctly. Install **CUDA 12.6** from [NVIDIA's official site](https://developer.nvidia.com/cuda-12-6-0-download-archive).
+
+#### **2. Set Up CUDA Path (If Installed)**
+
+Run this command in PowerShell:
+
+```powershell
+$env:PATH += ";C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
+```
+
+Then, check if CUDA is detected:
+
+```powershell
+nvcc --version
+```
+
+#### **3. Install PyTorch with CUDA 12.6**
+
+Run:
+
+```powershell
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+```
+
+Verify GPU availability:
+
+```python
+import torch
+print(torch.cuda.is_available())  # Should return True
+print(torch.cuda.get_device_name(0))  # Should return your GPU name
+```
+
+#### **4. Run Whisper with GPU**
+
+Use:
+
+```powershell
+python -m whisper --model medium --device cuda
+```
+
+If it still runs on CPU, force GPU usage:
+
+```powershell
+python -m whisper --model medium --device cuda --fp16 False
+```
+
+If you still face issues, ensure your **NVIDIA drivers are up to date**.
 
 ---
 
