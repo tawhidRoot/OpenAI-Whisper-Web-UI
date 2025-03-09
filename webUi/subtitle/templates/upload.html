@@ -30,14 +30,24 @@
       .btn-custom {
         width: 100%;
       }
+      .nav-link {
+        margin-bottom: 15px;
+        display: block;
+        text-align: right;
+      }
     </style>
   </head>
   <body>
     <div class="container">
+      <div class="text-end">
+        <a href="{% url 'model_management' %}" class="btn btn-secondary"
+          >Manage Models</a
+        >
+      </div>
+
       <h2 class="text-center mb-4">AI Audio Transcription</h2>
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-
         <div class="mb-3">
           <label class="form-label">Upload Audio File:</label>
           {{ form.audio_file }}
@@ -74,7 +84,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary btn-custom">
-          Transcribe
+          Transcribe Audio
         </button>
       </form>
     </div>

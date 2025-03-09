@@ -10,6 +10,7 @@ class AudioUploadForm(forms.Form):
         ("small", "Small"),
         ("medium", "Medium"),
         ("large", "Large"),
+        ("turbo", "Turbo"),
     ]
     model_choice = forms.ChoiceField(choices=MODEL_CHOICES, initial="base", label="Whisper Model")
 
