@@ -18,3 +18,6 @@ xdg-open "http://127.0.0.1:8000/"
 #Make sure to make the script executable with:
 #chmod +x script_name.sh
 #./script_name.sh
+
+# Close the terminal
+exit

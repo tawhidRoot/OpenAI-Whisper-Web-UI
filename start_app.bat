@@ -14,4 +14,5 @@ timeout /t 5 /nobreak >nul
 REM Open the default web browser to the local server URL
 start "" "http://127.0.0.1:8000/"
 
-pause
+REM Close the terminal
+exit

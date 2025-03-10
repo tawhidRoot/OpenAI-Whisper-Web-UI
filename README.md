@@ -1,122 +1,110 @@
 # OpenAI Whisper Web UI
 
-This repository provides a **simple, web-based interface** for using **OpenAI Whisper**, enabling users to effortlessly transcribe audio through a graphical interface. It is designed to be lightweight, easy to set up, and user-friendly.
+This repository provides a **simple, web-based interface** for using **OpenAI Whisper**, making it easy to transcribe audio files through a graphical interface. It is designed to be **lightweight, easy to set up, and user-friendly**.
 
-## Requirements
+---
 
-Before you start, ensure you have the following installed on your machine:
+## 🚀 Requirements
 
-1. **Python** - A programming language required to run the application. You can download it from the official website here: [Python Official Website](https://www.python.org/downloads/).
-2. **Git** - A version control system to clone the repository. You can download it from the official website here: [Git Official Website](https://git-scm.com/downloads).
-3. **FFmpeg** - A multimedia framework for handling audio and video files. You can download it from the official website here: [FFmpeg Official Website](https://ffmpeg.org/download.html).
-4. **CUDA Toolkit (Optional)** - If you plan to use a GPU for faster processing, ensure that the [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) is installed along with the appropriate drivers for your GPU.
+Before you begin, make sure you have the following installed on your machine:
 
-## Features
+✅ **Python** – Required to run the application. Download it here: [Python Official Website](https://www.python.org/downloads/)  
+✅ **Git** – Used for cloning the repository. Download it here: [Git Official Website](https://git-scm.com/downloads)  
+✅ **FFmpeg** – Needed for handling audio files. Download it here: [FFmpeg Official Website](https://ffmpeg.org/download.html)  
+✅ **PyTorch** – Required for running OpenAI Whisper. Download it here: [PyTorch Official Website](https://pytorch.org/get-started/locally/)  
+✅ **CUDA Toolkit (Optional, for GPU users)** – Boosts performance by running computations on a GPU. Install it here: [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
 
-- **User-friendly web UI** for seamless interaction with OpenAI Whisper.
-- **Effortless installation** with a minimal setup process.
-- **Local execution**, allowing you to run the app with a simple double-click.
+---
 
-## Installation & Usage
+## ✨ Features
 
-Follow the steps below to set up and use the application.
+✔️ **Easy-to-use web UI** – No command-line experience needed  
+✔️ **Quick setup** – Install and start using it in minutes  
+✔️ **Supports CPU & GPU** – Works on any device, but GPU acceleration is available for faster performance
 
-### 1. Clone the Repository
+---
 
-Start by cloning the repository to your local machine. If you don't have **Git** installed, you can download it from the official website here: [Git Official Website](https://git-scm.com/downloads).
+## 📌 Installation & Usage
 
-Once Git is installed, you can clone the repository using the following command:
+Follow these steps to set up and run the application:
+
+### 🔹 Step 1: Clone the Repository
+
+Open a terminal or command prompt and run:
 
 ```bash
 git clone https://github.com/tawhidRoot/OpenAI-Whisper-Web-UI.git
 ```
 
-### 2. Navigate to the Project Directory
-
-After cloning, navigate to the project folder:
+Then navigate to the project folder:
 
 ```bash
 cd OpenAI-Whisper-Web-UI
 ```
 
-### 3. Run the Setup
+### 🔹 Step 2: Run the Setup
 
-For **Windows users**:
+#### **For Windows users:**
 
-- **Double-click `setup.bat`** to automatically complete the setup process. This will:
-  - Install necessary dependencies
-  - Set up the environment
-  - Update Python if needed
+Simply **double-click `setup.bat`**, and it will:  
+✅ Install dependencies  
+✅ Set up the environment  
+✅ Check for updates
 
-For **Linux/macOS users**:
+#### **For Linux/macOS users:**
 
-1. Before running the setup script, you may need to **make the script executable** by running:
+1️⃣ Make the setup script executable:
 
-   ```bash
-   chmod +x setup.sh
-   ```
+```bash
+chmod +x setup.sh
+```
 
-2. Then, run the setup script with the following command:
+2️⃣ Run the setup script:
 
-   ```bash
-   bash setup.sh
-   ```
+```bash
+bash setup.sh
+```
 
-The setup scripts will:
+This will:
 
-- Create a virtual environment (`venv`) if it doesn't exist.
-- Install the required Python dependencies such as **Django** and **OpenAI Whisper**.
-- Check if CUDA is available and install **PyTorch** with GPU support if CUDA is present. Otherwise, it will install PyTorch with CPU support.
+- Create a virtual environment (`venv`) if it doesn’t exist
+- Install required dependencies like **Django** and **OpenAI Whisper**
+- Check for CUDA and install **PyTorch** with GPU support (if available)
 
-### 4. Launch the Application
+### 🔹 Step 3: Launch the Application
 
-Once the setup is complete:
-
-- **Windows users**: Simply **double-click `start_app.bat`** to launch the web application.
-- **Linux/macOS users**: Double-click `start_app.sh` to run the app, or execute it from the terminal with:
-
+- **Windows users**: Double-click `start_app.bat`
+- **Linux/macOS users**: Run:
   ```bash
   ./start_app.sh
   ```
 
-### 5. Additional Tips
-
-- If you encounter any errors during setup, rerun the setup script to ensure all dependencies are installed properly.
-- For GPU support, make sure you have the **CUDA Toolkit** and **drivers** installed. If you don't have a GPU, the application will still work using CPU support.
+That’s it! The web interface will open in your browser automatically.
 
 ---
 
-## Troubleshooting
+## 🔥 Want to Learn More About OpenAI Whisper?
 
-### **GPU Not Detected Issue**
+Check out the official GitHub repository:  
+🔗 [OpenAI Whisper GitHub Repository](https://github.com/openai/whisper)
 
-If Whisper is not using your GPU, follow these steps:
+---
 
-#### **1. Check if CUDA is Installed**
+## 🛠 Troubleshooting
 
-Run the following command in PowerShell or Command Prompt:
+### ❌ Problem: GPU is Not Being Used
+
+#### ✅ **Step 1: Check if CUDA is Installed**
+
+Run this command in PowerShell or Command Prompt:
 
 ```powershell
 where nvcc
 ```
 
-If no path is returned, CUDA is not installed correctly. Install **CUDA 12.6** from [NVIDIA's official site](https://developer.nvidia.com/cuda-12-6-0-download-archive).
+If nothing appears, **CUDA is not installed properly**. Download **CUDA 12.6** from [NVIDIA's official site](https://developer.nvidia.com/cuda-12-6-0-download-archive).
 
-#### **2. Set Up CUDA Path (If Installed)**
-
-Run this command in PowerShell:
-
-```powershell
-$env:PATH += ";C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
-```
-
-Then, check if CUDA is detected:
-
-```powershell
-nvcc --version
-```
-
-#### **3. Install PyTorch with CUDA 12.6**
+#### ✅ **Step 2: Install PyTorch with CUDA Support**
 
 Run:
 
@@ -124,40 +112,32 @@ Run:
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
 ```
 
-Verify GPU availability:
+Check if your GPU is detected:
 
 ```python
 import torch
 print(torch.cuda.is_available())  # Should return True
-print(torch.cuda.get_device_name(0))  # Should return your GPU name
+print(torch.cuda.get_device_name(0))  # Should show your GPU name
 ```
 
-#### **4. Run Whisper with GPU**
-
-Use:
-
-```powershell
-python -m whisper --model medium --device cuda
-```
-
-If it still runs on CPU, force GPU usage:
+#### ✅ **Step 3: Force Whisper to Use GPU**
 
 ```powershell
 python -m whisper --model medium --device cuda --fp16 False
 ```
 
-If you still face issues, ensure your **NVIDIA drivers are up to date**.
+If you still face issues, make sure your **NVIDIA drivers are up to date**.
 
 ---
 
-## License
+## 📜 License
 
 This project is open-source and licensed under the **MIT License**.
 
-## Contributing
+## 💡 Contributing
 
-Contributions are welcome! If you have any improvements or fixes, feel free to submit a **pull request** or report any issues you encounter.
+We welcome contributions! If you have improvements or bug fixes, feel free to submit a **pull request** or report an issue.
 
-## Disclaimer
+## ⚠️ Disclaimer
 
-This project is **independent** and **not affiliated** with OpenAI. Use this project at your own discretion.
+This project is **independent** and **not affiliated** with OpenAI. Use it at your own discretion.

@@ -1,2 +1,8 @@
-webUI/openaiWhisperModels
-webUI/temp
+# Ignore the OpenAI Whisper models directory
+/webUI/openaiWhisperModels/
+
+# Ignore the temp directory
+/webUI/temp/
+
+# Ignore the virtual environment directory
+/venv/

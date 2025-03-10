@@ -8,6 +8,9 @@ call venv\Scripts\activate
 REM Install Django
 pip install django
 
+REM Install PyTorch
+pip install torch
+
 REM Install OpenAI Whisper using the long command
 pip install git+https://github.com/openai/whisper.git
 
