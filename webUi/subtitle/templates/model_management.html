@@ -50,15 +50,33 @@
       </form>
 
       <h3>Downloaded Models:</h3>
-      <ul>
+      <ul class="list-group">
         {% for model in models %}
-        <li>{{ model }}</li>
+        <li
+          class="list-group-item d-flex justify-content-between align-items-center"
+        >
+          {{ model }}
+          <form method="post" style="margin: 0">
+            {% csrf_token %}
+            <input type="hidden" name="model_name" value="{{ model }}" />
+            <button
+              type="submit"
+              name="action"
+              value="delete"
+              class="btn btn-danger btn-sm"
+            >
+              Delete
+            </button>
+          </form>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No models downloaded.</li>
         {% endfor %}
       </ul>
 
-      <div class="text-end">
+      <div class="text-end mt-3">
         <a href="{% url 'transcribe_audio' %}" class="btn btn-link"
-          >transcribe audio</a
+          >Transcribe Audio</a
         >
       </div>
     </div>

@@ -13,29 +13,29 @@ from django.core.files.base import ContentFile
 from .forms import AudioUploadForm
 
 # Define model directory path
-MODEL_DIR = os.path.join(settings.BASE_DIR, 'openaiWhisperModels')
+MODEL_DIR = os.path.join(settings.BASE_DIR, "openaiWhisperModels")
 
 # Ensure the models directory exists
 if not os.path.exists(MODEL_DIR):
     os.makedirs(MODEL_DIR)
 
-# Function to check downloaded models
+
 def get_downloaded_models():
+    """Returns a list of downloaded model names."""
     try:
-        downloaded_models = os.listdir(MODEL_DIR)
-        return downloaded_models
+        return os.listdir(MODEL_DIR)
     except FileNotFoundError:
         return []
 
-# Function to download a new model
+
 def download_model(model_name):
+    """Download a model if it doesn't exist locally."""
     model_path = os.path.join(MODEL_DIR, model_name)
     if not os.path.exists(model_path):
         try:
             _ = whisper.load_model(model_name, download_root=MODEL_DIR)
         except RuntimeError as e:
             if "SHA256 checksum does not" in str(e):
-                # Remove the corrupted/incomplete model folder and retry
                 if os.path.exists(model_path):
                     shutil.rmtree(model_path)
                 _ = whisper.load_model(model_name, download_root=MODEL_DIR)
@@ -44,55 +44,84 @@ def download_model(model_name):
         return True
     return False
 
-# Function to update the model
+
 def update_model(model_name):
+    """Update a model by removing the old folder and re-downloading."""
     model_path = os.path.join(MODEL_DIR, model_name)
     if os.path.exists(model_path):
-        shutil.rmtree(model_path)  # Remove the old model folder
+        shutil.rmtree(model_path)
     return download_model(model_name)
+
 
 def model_management(request):
     downloaded_models = get_downloaded_models()
-
-    if request.method == 'POST':
-        model_name = request.POST.get('model_name')
-        action = request.POST.get('action')
-
-        if action == 'download':
+    if request.method == "POST":
+        model_name = request.POST.get("model_name")
+        action = request.POST.get("action")
+        if action == "download":
             download_model(model_name)
-        elif action == 'update':
+        elif action == "update":
             update_model(model_name)
-
-        # Reload the models list after performing the action
+        elif action == "delete":
+            model_path = os.path.join(MODEL_DIR, model_name)
+            if os.path.exists(model_path):
+                shutil.rmtree(model_path)
         downloaded_models = get_downloaded_models()
+    return render(request, "model_management.html", {"models": downloaded_models})
 
-    return render(request, 'model_management.html', {'models': downloaded_models})
+
+def format_subtitle_text(text, max_words, mode):
+    """
+    Formats subtitle text based on the selected mode.
+    - "line": splits the text into multiple lines, each containing at most max_words.
+    - "full": returns the full subtitle text without truncation.
+    """
+    if mode == "line":
+        words = text.split()
+        lines = []
+        for i in range(0, len(words), max_words):
+            lines.append(" ".join(words[i : i + max_words]))
+        return "\n".join(lines)
+    elif mode == "full":
+        # Return full text without truncation
+        return text
+    else:
+        return text
+
 
 def transcribe_audio(request):
     if request.method == "POST":
         form = AudioUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save the uploaded file temporarily
+            # Save the uploaded audio file temporarily
             audio_file = request.FILES["audio_file"]
-            file_name = os.path.splitext(audio_file.name)[0]  # File name without extension
-            file_path = default_storage.save(f"temp/{audio_file.name}", ContentFile(audio_file.read()))
+            file_name = os.path.splitext(audio_file.name)[0]
+            file_path = default_storage.save(
+                f"temp/{audio_file.name}", ContentFile(audio_file.read())
+            )
 
-            # Retrieve form data for transcription options
+            # Retrieve transcription options
             model_choice = form.cleaned_data["model_choice"]
-            language = form.cleaned_data["language"] or None  # Auto-detect if not provided
+            language = form.cleaned_data["language"]
+            if language.strip().lower() == "multiple":
+                language = None
             temperature = form.cleaned_data["temperature"]
             best_of = form.cleaned_data["best_of"]
-            condition_on_previous_text = form.cleaned_data["condition_on_previous_text"] == "true"
+            condition_on_previous_text = (
+                form.cleaned_data["condition_on_previous_text"] == "true"
+            )
             output_format = form.cleaned_data["output_format"]
+            max_subtitle_length = form.cleaned_data.get("max_subtitle_length", 3)
+            max_length_mode = form.cleaned_data.get("max_length_mode", "line")
 
-            # Determine if GPU is available
+            # Select device (GPU if available)
             device = "cuda" if torch.cuda.is_available() else "cpu"
-            print(f"Using device: {device}")  # Debugging statement
+            print(f"Using device: {device}")
 
-            # Load the Whisper model with GPU support if available
+            # Load Whisper model
             model = whisper.load_model(model_choice, download_root=MODEL_DIR).to(device)
 
-            # Transcribe audio
+            # Transcribe audio file
             result = model.transcribe(
                 file_path,
                 language=language,
@@ -101,7 +130,7 @@ def transcribe_audio(request):
                 condition_on_previous_text=condition_on_previous_text,
             )
 
-            # Generate the output file
+            # Prepare output file
             file_extension = output_format
             output_filename = f"{file_name}.{file_extension}"
             output_file_path = os.path.join("temp", output_filename)
@@ -112,15 +141,17 @@ def transcribe_audio(request):
                         start_time = segment["start"]
                         end_time = segment["end"]
                         text = segment["text"]
-
+                        formatted_text = format_subtitle_text(
+                            text, max_subtitle_length, max_length_mode
+                        )
                         srt_file.write(f"{i+1}\n")
-                        srt_file.write(f"{format_time(start_time)} --> {format_time(end_time)}\n")
-                        srt_file.write(text + "\n\n")
-
+                        srt_file.write(
+                            f"{format_time(start_time)} --> {format_time(end_time)}\n"
+                        )
+                        srt_file.write(formatted_text + "\n\n")
             elif output_format == "txt":
                 with open(output_file_path, "w", encoding="utf-8") as txt_file:
                     txt_file.write(result["text"])
-
             elif output_format == "vtt":
                 with open(output_file_path, "w", encoding="utf-8") as vtt_file:
                     vtt_file.write("WEBVTT\n\n")
@@ -128,30 +159,35 @@ def transcribe_audio(request):
                         start_time = segment["start"]
                         end_time = segment["end"]
                         text = segment["text"]
-
+                        formatted_text = format_subtitle_text(
+                            text, max_subtitle_length, max_length_mode
+                        )
                         vtt_file.write(f"{i+1}\n")
-                        vtt_file.write(f"{format_time(start_time)} --> {format_time(end_time)}\n")
-                        vtt_file.write(text + "\n\n")
-
+                        vtt_file.write(
+                            f"{format_time(start_time)} --> {format_time(end_time)}\n"
+                        )
+                        vtt_file.write(formatted_text + "\n\n")
             elif output_format == "json":
                 with open(output_file_path, "w", encoding="utf-8") as json_file:
                     json.dump(result, json_file, indent=4)
 
-            # Prepare response for file download
+            # Return file as download response
             with open(output_file_path, "rb") as f:
-                response = HttpResponse(f.read(), content_type=mimetypes.guess_type(output_file_path)[0])
-                response["Content-Disposition"] = f'attachment; filename="{output_filename}"'
+                response = HttpResponse(
+                    f.read(), content_type=mimetypes.guess_type(output_file_path)[0]
+                )
+                response["Content-Disposition"] = (
+                    f'attachment; filename="{output_filename}"'
+                )
 
             # Clean up temporary files
             os.remove(file_path)
             os.remove(output_file_path)
-
             return response
-
     else:
         form = AudioUploadForm()
-
     return render(request, "upload.html", {"form": form})
+
 
 def format_time(seconds):
     """Converts seconds to SRT/VTT timestamp format (HH:MM:SS,mmm)"""
