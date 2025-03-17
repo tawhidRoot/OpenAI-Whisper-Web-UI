@@ -4,12 +4,14 @@ import whisper
 import mimetypes
 import json
 import torch
+import urllib.parse  # <-- Imported for URL encoding the filename
 
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.utils.text import get_valid_filename  # For sanitizing filenames
 from .forms import AudioUploadForm
 
 # Define model directory path
@@ -83,7 +85,6 @@ def format_subtitle_text(text, max_words, mode):
             lines.append(" ".join(words[i : i + max_words]))
         return "\n".join(lines)
     elif mode == "full":
-        # Return full text without truncation
         return text
     else:
         return text
@@ -95,9 +96,14 @@ def transcribe_audio(request):
         if form.is_valid():
             # Save the uploaded audio file temporarily
             audio_file = request.FILES["audio_file"]
-            file_name = os.path.splitext(audio_file.name)[0]
+            # Split the original file name and extension
+            original_name, ext = os.path.splitext(audio_file.name)
+            # Sanitize the base filename using Django's helper
+            safe_base_name = get_valid_filename(original_name)
+            # Reconstruct the filename with its original extension
+            safe_audio_file_name = f"{safe_base_name}{ext}"
             file_path = default_storage.save(
-                f"temp/{audio_file.name}", ContentFile(audio_file.read())
+                f"temp/{safe_audio_file_name}", ContentFile(audio_file.read())
             )
 
             # Retrieve transcription options
@@ -130,7 +136,8 @@ def transcribe_audio(request):
 
             # Prepare output file
             file_extension = output_format
-            output_filename = f"{file_name}.{file_extension}"
+            # Use the sanitized base name for output filename
+            output_filename = f"{safe_base_name}.{file_extension}"
             output_file_path = os.path.join("temp", output_filename)
 
             if output_format == "srt":
@@ -174,8 +181,15 @@ def transcribe_audio(request):
                 response = HttpResponse(
                     f.read(), content_type=mimetypes.guess_type(output_file_path)[0]
                 )
+                # Create an ASCII fallback filename by stripping non-ASCII characters
+                ascii_base = safe_base_name.encode("ascii", "ignore").decode("ascii")
+                fallback_filename = f"{ascii_base}.{file_extension}"
+                # URL-encode the full output filename (which may include non-ASCII characters)
+                encoded_filename = urllib.parse.quote(output_filename)
+                # Set Content-Disposition header with both fallback and UTF-8 encoded filename
                 response["Content-Disposition"] = (
-                    f'attachment; filename="{output_filename}"'
+                    f'attachment; filename="{fallback_filename}"; '
+                    f"filename*=UTF-8''{encoded_filename}"
                 )
 
             # Clean up temporary files
