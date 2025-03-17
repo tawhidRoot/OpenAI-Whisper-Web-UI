@@ -102,9 +102,7 @@ def transcribe_audio(request):
 
             # Retrieve transcription options
             model_choice = form.cleaned_data["model_choice"]
-            language = form.cleaned_data["language"]
-            if language.strip().lower() == "multiple":
-                language = None
+            language = form.cleaned_data["language"] or None
             temperature = form.cleaned_data["temperature"]
             best_of = form.cleaned_data["best_of"]
             condition_on_previous_text = (
