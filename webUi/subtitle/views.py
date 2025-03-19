@@ -3,8 +3,9 @@ import shutil
 import whisper
 import mimetypes
 import json
+import urllib.parse  # For URL encoding the filename
+import logging
 import torch
-import urllib.parse  # <-- Imported for URL encoding the filename
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -14,12 +15,12 @@ from django.core.files.base import ContentFile
 from django.utils.text import get_valid_filename  # For sanitizing filenames
 from .forms import AudioUploadForm
 
-# Define model directory path
-MODEL_DIR = os.path.join(settings.BASE_DIR, "openaiWhisperModels")
+# Configure logging
+logger = logging.getLogger(__name__)
 
-# Ensure the models directory exists
-if not os.path.exists(MODEL_DIR):
-    os.makedirs(MODEL_DIR)
+# Define model directory path and ensure it exists
+MODEL_DIR = os.path.join(settings.BASE_DIR, "openaiWhisperModels")
+os.makedirs(MODEL_DIR, exist_ok=True)
 
 
 def get_downloaded_models():
@@ -56,6 +57,7 @@ def update_model(model_name):
 
 
 def model_management(request):
+    """Handles model download, update, and deletion requests."""
     downloaded_models = get_downloaded_models()
     if request.method == "POST":
         model_name = request.POST.get("model_name")
@@ -80,30 +82,68 @@ def format_subtitle_text(text, max_words, mode):
     """
     if mode == "line":
         words = text.split()
-        lines = []
-        for i in range(0, len(words), max_words):
-            lines.append(" ".join(words[i : i + max_words]))
+        lines = [
+            " ".join(words[i : i + max_words]) for i in range(0, len(words), max_words)
+        ]
         return "\n".join(lines)
-    elif mode == "full":
-        return text
-    else:
-        return text
+    return text
+
+
+def format_time(seconds, fmt="srt"):
+    """
+    Converts seconds to timestamp format.
+    For SRT: returns HH:MM:SS,mmm.
+    For VTT: returns HH:MM:SS.mmm.
+    """
+    millisec = int(round((seconds % 1) * 1000))
+    seconds_int = int(seconds)
+    minutes = seconds_int // 60
+    hours = minutes // 60
+    minutes = minutes % 60
+    seconds_int = seconds_int % 60
+    if fmt == "vtt":
+        return f"{hours:02}:{minutes:02}:{seconds_int:02}.{millisec:03}"
+    return f"{hours:02}:{minutes:02}:{seconds_int:02},{millisec:03}"
+
+
+def write_subtitles(
+    file_handle, segments, max_subtitle_length, max_length_mode, fmt="srt"
+):
+    """
+    Writes subtitle segments to an open file handle.
+    Uses the appropriate timestamp format based on fmt.
+    """
+    for i, segment in enumerate(segments):
+        start_time = segment["start"]
+        end_time = segment["end"]
+        text = segment["text"]
+        formatted_text = format_subtitle_text(
+            text, max_subtitle_length, max_length_mode
+        )
+        file_handle.write(f"{i + 1}\n")
+        file_handle.write(
+            f"{format_time(start_time, fmt)} --> {format_time(end_time, fmt)}\n"
+        )
+        file_handle.write(formatted_text + "\n\n")
 
 
 def transcribe_audio(request):
+    """
+    Handles the audio file upload, transcription using Whisper,
+    and returns the transcription file in the requested output format.
+    """
     if request.method == "POST":
         form = AudioUploadForm(request.POST, request.FILES)
         if form.is_valid():
             # Save the uploaded audio file temporarily
             audio_file = request.FILES["audio_file"]
-            # Split the original file name and extension
             original_name, ext = os.path.splitext(audio_file.name)
-            # Sanitize the base filename using Django's helper
             safe_base_name = get_valid_filename(original_name)
-            # Reconstruct the filename with its original extension
             safe_audio_file_name = f"{safe_base_name}{ext}"
+            temp_dir = "temp"
             file_path = default_storage.save(
-                f"temp/{safe_audio_file_name}", ContentFile(audio_file.read())
+                os.path.join(temp_dir, safe_audio_file_name),
+                ContentFile(audio_file.read()),
             )
 
             # Retrieve transcription options
@@ -120,7 +160,7 @@ def transcribe_audio(request):
 
             # Select device (GPU if available)
             device = "cuda" if torch.cuda.is_available() else "cpu"
-            print(f"Using device: {device}")
+            logger.info(f"Using device: {device}")
 
             # Load Whisper model
             model = whisper.load_model(model_choice, download_root=MODEL_DIR).to(device)
@@ -136,77 +176,60 @@ def transcribe_audio(request):
 
             # Prepare output file
             file_extension = output_format
-            # Use the sanitized base name for output filename
             output_filename = f"{safe_base_name}.{file_extension}"
-            output_file_path = os.path.join("temp", output_filename)
+            output_file_path = os.path.join(temp_dir, output_filename)
 
-            if output_format == "srt":
-                with open(output_file_path, "w", encoding="utf-8") as srt_file:
-                    for i, segment in enumerate(result["segments"]):
-                        start_time = segment["start"]
-                        end_time = segment["end"]
-                        text = segment["text"]
-                        formatted_text = format_subtitle_text(
-                            text, max_subtitle_length, max_length_mode
+            try:
+                if output_format == "srt":
+                    with open(output_file_path, "w", encoding="utf-8") as subtitle_file:
+                        write_subtitles(
+                            subtitle_file,
+                            result["segments"],
+                            max_subtitle_length,
+                            max_length_mode,
+                            fmt="srt",
                         )
-                        srt_file.write(f"{i+1}\n")
-                        srt_file.write(
-                            f"{format_time(start_time)} --> {format_time(end_time)}\n"
+                elif output_format == "vtt":
+                    with open(output_file_path, "w", encoding="utf-8") as subtitle_file:
+                        subtitle_file.write("WEBVTT\n\n")
+                        write_subtitles(
+                            subtitle_file,
+                            result["segments"],
+                            max_subtitle_length,
+                            max_length_mode,
+                            fmt="vtt",
                         )
-                        srt_file.write(formatted_text + "\n\n")
-            elif output_format == "txt":
-                with open(output_file_path, "w", encoding="utf-8") as txt_file:
-                    txt_file.write(result["text"])
-            elif output_format == "vtt":
-                with open(output_file_path, "w", encoding="utf-8") as vtt_file:
-                    vtt_file.write("WEBVTT\n\n")
-                    for i, segment in enumerate(result["segments"]):
-                        start_time = segment["start"]
-                        end_time = segment["end"]
-                        text = segment["text"]
-                        formatted_text = format_subtitle_text(
-                            text, max_subtitle_length, max_length_mode
-                        )
-                        vtt_file.write(f"{i+1}\n")
-                        vtt_file.write(
-                            f"{format_time(start_time)} --> {format_time(end_time)}\n"
-                        )
-                        vtt_file.write(formatted_text + "\n\n")
-            elif output_format == "json":
-                with open(output_file_path, "w", encoding="utf-8") as json_file:
-                    json.dump(result, json_file, indent=4)
+                elif output_format == "txt":
+                    with open(output_file_path, "w", encoding="utf-8") as txt_file:
+                        txt_file.write(result["text"])
+                elif output_format == "json":
+                    with open(output_file_path, "w", encoding="utf-8") as json_file:
+                        json.dump(result, json_file, indent=4)
+                else:
+                    raise ValueError("Unsupported output format.")
 
-            # Return file as download response
-            with open(output_file_path, "rb") as f:
-                response = HttpResponse(
-                    f.read(), content_type=mimetypes.guess_type(output_file_path)[0]
-                )
-                # Create an ASCII fallback filename by stripping non-ASCII characters
-                ascii_base = safe_base_name.encode("ascii", "ignore").decode("ascii")
-                fallback_filename = f"{ascii_base}.{file_extension}"
-                # URL-encode the full output filename (which may include non-ASCII characters)
-                encoded_filename = urllib.parse.quote(output_filename)
-                # Set Content-Disposition header with both fallback and UTF-8 encoded filename
-                response["Content-Disposition"] = (
-                    f'attachment; filename="{fallback_filename}"; '
-                    f"filename*=UTF-8''{encoded_filename}"
-                )
-
-            # Clean up temporary files
-            os.remove(file_path)
-            os.remove(output_file_path)
-            return response
+                # Return file as download response
+                with open(output_file_path, "rb") as f:
+                    response = HttpResponse(
+                        f.read(), content_type=mimetypes.guess_type(output_file_path)[0]
+                    )
+                    # Create an ASCII fallback filename
+                    ascii_base = safe_base_name.encode("ascii", "ignore").decode(
+                        "ascii"
+                    )
+                    fallback_filename = f"{ascii_base}.{file_extension}"
+                    encoded_filename = urllib.parse.quote(output_filename)
+                    response["Content-Disposition"] = (
+                        f'attachment; filename="{fallback_filename}"; '
+                        f"filename*=UTF-8''{encoded_filename}"
+                    )
+                return response
+            finally:
+                # Clean up temporary files
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                if os.path.exists(output_file_path):
+                    os.remove(output_file_path)
     else:
         form = AudioUploadForm()
     return render(request, "upload.html", {"form": form})
-
-
-def format_time(seconds):
-    """Converts seconds to SRT/VTT timestamp format (HH:MM:SS,mmm)"""
-    millisec = int((seconds % 1) * 1000)
-    seconds = int(seconds)
-    minutes = seconds // 60
-    hours = minutes // 60
-    minutes = minutes % 60
-    seconds = seconds % 60
-    return f"{hours:02}:{minutes:02}:{seconds:02},{millisec:03}"
