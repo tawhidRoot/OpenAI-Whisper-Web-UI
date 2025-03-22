@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 MODEL_DIR = os.path.join(settings.BASE_DIR, "openaiWhisperModels")
 os.makedirs(MODEL_DIR, exist_ok=True)
 
+# Global model cache for optimization
+MODEL_CACHE = {}
+
 
 def get_downloaded_models():
     """Returns a list of downloaded model names."""
@@ -44,6 +47,9 @@ def download_model(model_name):
                 _ = whisper.load_model(model_name, download_root=MODEL_DIR)
             else:
                 raise e
+        # Invalidate cache for the model
+        if model_name in MODEL_CACHE:
+            del MODEL_CACHE[model_name]
         return True
     return False
 
@@ -53,6 +59,8 @@ def update_model(model_name):
     model_path = os.path.join(MODEL_DIR, model_name)
     if os.path.exists(model_path):
         shutil.rmtree(model_path)
+    if model_name in MODEL_CACHE:
+        del MODEL_CACHE[model_name]
     return download_model(model_name)
 
 
@@ -70,6 +78,8 @@ def model_management(request):
             model_path = os.path.join(MODEL_DIR, model_name)
             if os.path.exists(model_path):
                 shutil.rmtree(model_path)
+            if model_name in MODEL_CACHE:
+                del MODEL_CACHE[model_name]
         downloaded_models = get_downloaded_models()
     return render(request, "model_management.html", {"models": downloaded_models})
 
@@ -131,10 +141,28 @@ def transcribe_audio(request):
     """
     Handles the audio file upload, transcription using Whisper,
     and returns the transcription file in the requested output format.
+    Also saves user settings in the session for persistence.
     """
+    # Load saved settings from session if they exist
+    saved_settings = request.session.get("audio_settings", {})
+
     if request.method == "POST":
         form = AudioUploadForm(request.POST, request.FILES)
         if form.is_valid():
+            # Save settings in session for future use
+            request.session["audio_settings"] = {
+                "model_choice": form.cleaned_data["model_choice"],
+                "language": form.cleaned_data["language"],
+                "temperature": form.cleaned_data["temperature"],
+                "best_of": form.cleaned_data["best_of"],
+                "condition_on_previous_text": form.cleaned_data[
+                    "condition_on_previous_text"
+                ],
+                "output_format": form.cleaned_data["output_format"],
+                "max_subtitle_length": form.cleaned_data["max_subtitle_length"],
+                "max_length_mode": form.cleaned_data["max_length_mode"],
+            }
+
             # Save the uploaded audio file temporarily
             audio_file = request.FILES["audio_file"]
             original_name, ext = os.path.splitext(audio_file.name)
@@ -162,8 +190,16 @@ def transcribe_audio(request):
             device = "cuda" if torch.cuda.is_available() else "cpu"
             logger.info(f"Using device: {device}")
 
-            # Load Whisper model
-            model = whisper.load_model(model_choice, download_root=MODEL_DIR).to(device)
+            # Load Whisper model from cache or download if necessary
+            if model_choice in MODEL_CACHE:
+                model = MODEL_CACHE[model_choice]
+                logger.info(f"Loaded '{model_choice}' model from cache.")
+            else:
+                model = whisper.load_model(model_choice, download_root=MODEL_DIR).to(
+                    device
+                )
+                MODEL_CACHE[model_choice] = model
+                logger.info(f"Loaded '{model_choice}' model and added to cache.")
 
             # Transcribe audio file
             result = model.transcribe(
@@ -231,5 +267,6 @@ def transcribe_audio(request):
                 if os.path.exists(output_file_path):
                     os.remove(output_file_path)
     else:
-        form = AudioUploadForm()
+        # Initialize form with saved settings if available
+        form = AudioUploadForm(initial=saved_settings)
     return render(request, "upload.html", {"form": form})

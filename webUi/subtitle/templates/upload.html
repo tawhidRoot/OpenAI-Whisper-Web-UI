@@ -5,10 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Audio Transcription</title>
-    <link
-      rel="stylesheet"
-      href="{% static 'bootstrap-5.3.3-dist/css/bootstrap.min.css' %}"
-    />
+    <link rel="stylesheet" href="{% static 'bootstrap-5.3.3-dist/css/bootstrap.min.css' %}" />
   </head>
   <body>
     <div class="container my-5">
@@ -20,97 +17,53 @@
             </div>
             <div class="card-body">
               <div class="mb-3 text-end">
-                <a href="{% url 'model_management' %}" class="btn btn-link"
-                  >Manage Models</a
-                >
+                <a href="{% url 'model_management' %}" class="btn btn-link">Manage Models</a>
               </div>
               <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="audio_file"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Upload Audio File:</label
-                  >
+                  <label for="audio_file" class="col-md-4 col-form-label text-md-end">Upload Audio File:</label>
                   <div class="col-md-8">{{ form.audio_file }}</div>
                 </div>
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="model_choice"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Whisper Model:</label
-                  >
+                  <label for="model_choice" class="col-md-4 col-form-label text-md-end">Whisper Model:</label>
                   <div class="col-md-8">{{ form.model_choice }}</div>
                 </div>
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="language"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Language (Optional):</label
-                  >
+                  <label for="language" class="col-md-4 col-form-label text-md-end">Language (Optional):</label>
                   <div class="col-md-8">{{ form.language }}</div>
                 </div>
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="max_subtitle_length"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Max Subtitle Length (words):</label
-                  >
+                  <label for="max_subtitle_length" class="col-md-4 col-form-label text-md-end">Max Subtitle Length (words):</label>
                   <div class="col-md-8">{{ form.max_subtitle_length }}</div>
                 </div>
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="max_length_mode"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Max Length Mode:</label
-                  >
+                  <label for="max_length_mode" class="col-md-4 col-form-label text-md-end">Max Length Mode:</label>
                   <div class="col-md-8">{{ form.max_length_mode }}</div>
                 </div>
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="temperature"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Temperature:</label
-                  >
+                  <label for="temperature" class="col-md-4 col-form-label text-md-end">Temperature:</label>
                   <div class="col-md-8">{{ form.temperature }}</div>
                 </div>
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="best_of"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Best Of (Beam Size):</label
-                  >
+                  <label for="best_of" class="col-md-4 col-form-label text-md-end">Best Of (Beam Size):</label>
                   <div class="col-md-8">{{ form.best_of }}</div>
                 </div>
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="condition_on_previous_text"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Condition on Previous Text:</label
-                  >
-                  <div class="col-md-8">
-                    {{ form.condition_on_previous_text }}
-                  </div>
+                  <label for="condition_on_previous_text" class="col-md-4 col-form-label text-md-end">Condition on Previous Text:</label>
+                  <div class="col-md-8">{{ form.condition_on_previous_text }}</div>
                 </div>
                 <div class="mb-3 row align-items-center">
-                  <label
-                    for="output_format"
-                    class="col-md-4 col-form-label text-md-end"
-                    >Choose Output Format:</label
-                  >
+                  <label for="output_format" class="col-md-4 col-form-label text-md-end">Choose Output Format:</label>
                   <div class="col-md-8">{{ form.output_format }}</div>
                 </div>
                 <div class="text-center">
-                  <button type="submit" class="btn btn-primary">
-                    Transcribe Audio
-                  </button>
+                  <button type="submit" class="btn btn-primary">Transcribe Audio</button>
                 </div>
               </form>
             </div>
             <div class="card-footer text-center">
-              <small class="text-muted"
-                >&copy; 2025 AI Transcription Service</small
-              >
+              <small class="text-muted">&copy; 2025 AI Transcription Service</small>
             </div>
           </div>
         </div>

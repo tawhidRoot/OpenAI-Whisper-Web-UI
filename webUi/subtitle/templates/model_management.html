@@ -6,10 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Manage Whisper Models</title>
     <!-- Bootstrap CSS (Local) -->
-    <link
-      rel="stylesheet"
-      href="{% static 'bootstrap-5.3.3-dist/css/bootstrap.min.css' %}"
-    />
+    <link rel="stylesheet" href="{% static 'bootstrap-5.3.3-dist/css/bootstrap.min.css' %}" />
   </head>
   <body>
     <div class="container">
@@ -30,43 +27,20 @@
         </div>
 
         <div class="mb-3">
-          <button
-            type="submit"
-            name="action"
-            value="download"
-            class="btn btn-primary"
-          >
-            Download Model
-          </button>
-          <button
-            type="submit"
-            name="action"
-            value="update"
-            class="btn btn-warning"
-          >
-            Update Model
-          </button>
+          <button type="submit" name="action" value="download" class="btn btn-primary">Download Model</button>
+          <button type="submit" name="action" value="update" class="btn btn-warning">Update Model</button>
         </div>
       </form>
 
       <h3>Downloaded Models:</h3>
       <ul class="list-group">
         {% for model in models %}
-        <li
-          class="list-group-item d-flex justify-content-between align-items-center"
-        >
+        <li class="list-group-item d-flex justify-content-between align-items-center">
           {{ model }}
           <form method="post" style="margin: 0">
             {% csrf_token %}
             <input type="hidden" name="model_name" value="{{ model }}" />
-            <button
-              type="submit"
-              name="action"
-              value="delete"
-              class="btn btn-danger btn-sm"
-            >
-              Delete
-            </button>
+            <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm">Delete</button>
           </form>
         </li>
         {% empty %}
@@ -75,9 +49,7 @@
       </ul>
 
       <div class="text-end mt-3">
-        <a href="{% url 'transcribe_audio' %}" class="btn btn-link"
-          >Transcribe Audio</a
-        >
+        <a href="{% url 'transcribe_audio' %}" class="btn btn-link">Transcribe Audio</a>
       </div>
     </div>
 
